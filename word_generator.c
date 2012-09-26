@@ -1,0 +1,211 @@
+#include "word_generator.h"
+
+int blank(char *buffer)
+{
+    int i;
+    for(i=0;buffer[i]!='\0'; i++)
+        if(buffer[i]>32)
+            return 0;
+    return 1;
+}
+
+int interpret(char *buffer)
+{
+    int start=0, end, i;
+    int c = -2;
+    for(i=0; buffer[i]!='\0'; i++)
+        if(buffer[i]=='[' || buffer[i]=='-' || buffer[i]=='*')
+        {
+            c = buffer[i];
+            start = i+1;
+            break;
+        }
+    for(i=start;buffer[i]!='\0'; i++)
+        if(buffer[i]==']' || buffer[i]=='\r' || buffer[i]=='\n')
+            break;
+    end = i;
+    for(i=0;i<end-start; i++)
+        buffer[i]=buffer[start+i];
+    buffer[i]='\0';
+    return c;
+}
+
+
+int getLine(FILE *file, int length, char *buffer)
+{
+    int valid = -1;
+    while(valid==-1)
+    {
+        if(fgets(buffer, length, file)!=NULL)
+        {
+            if(!blank(buffer))
+            {
+                valid = interpret(buffer);
+                if(valid == -2)
+                    printf("Line \"%s\" has no meaning. Like your life.\n", buffer);
+            }
+        }
+        else
+        {
+            valid=0;
+            buffer[0]='\0';
+        }
+    }
+    return valid;
+}
+
+Rule* processRuleFile(arguments *args)
+{
+    FILE *file;
+    int rules_number;
+    Rule *rules;
+    
+    file = fopen(args->file_name, "r");
+    rules_number = countRules(file);
+    rules = malloc(sizeof(Rule)*rules_number);
+    initPass(file, rules, rules_number);
+    finalPass(file, rules, rules_number);
+    fclose(file);
+    return rules;
+}
+
+int countRules(FILE *file)
+{
+    char buffer[256];
+    int c;
+    int rules_number = 0;
+
+    fseek(file, 0, SEEK_SET);
+    do
+    {
+        c = getLine(file, 256, buffer);
+        if(c=='[')
+            rules_number++;
+    }while(c!=0);
+    return rules_number;
+}
+
+void initPass(FILE *file, Rule *rules, int rules_number) 
+{
+    char buffer[256];
+    int i, c;
+    int count;
+
+    fseek(file, 0, SEEK_SET);
+    c = getLine(file, 256, buffer);
+    for(i=0; i<rules_number;i++)
+    {
+        while(c!='[')
+            c = getLine(file, 256, buffer);
+        rules[i].name = malloc(strlen(buffer)+1);
+        strcpy(rules[i].name, buffer);
+        count = 0;
+        c = getLine(file, 256, buffer);
+        while(c=='-')
+        {
+            count++;
+            c = getLine(file, 256, buffer);
+        }
+        rules[i].connection_number = count;
+        rules[i].connections = (int*) malloc(sizeof(int)*count);
+        rules[i].connection_weight = (int*) malloc(sizeof(int)*count);
+        
+        count = 0;
+        while(c=='*')
+        {
+            count++;
+            c=getLine(file, 256, buffer);
+        }
+        rules[i].symbol_number = count;
+        rules[i].symbol_weight = (int*) malloc(sizeof(int)*count);
+        rules[i].symbols = (char**) malloc(sizeof(char*)*count);
+    }
+}
+
+void finalPass(FILE *file, Rule *rules, int rules_number) 
+{
+    char buffer[256];
+    int i, j, c;
+    
+    fseek(file, 0, SEEK_SET);
+    c = getLine(file, 256, buffer);
+    for(i=0; i<rules_number;i++)
+    {
+        while(c!='-')
+            c = getLine(file, 256, buffer);
+        for(j=0; j<rules[i].connection_number; j++)
+        {
+            setConnection(buffer, rules, rules_number, i, j);
+            c = getLine(file, 256, buffer);
+        }
+
+        for(j=0; j<rules[i].symbol_number; j++)
+        {
+            setSymbol(buffer, &rules[i], j);
+            c = getLine(file, 256, buffer);
+        }
+        
+        rules[i].connection_total_weight = 0;
+        for(j=0;j<rules[i].connection_number;j++)
+            rules[i].connection_total_weight+=rules[i].connection_weight[j];
+
+        rules[i].symbol_total_weight = 0;
+        for(j=0;j<rules[i].symbol_number;j++)
+            rules[i].symbol_total_weight+=rules[i].symbol_weight[j];
+    }
+}
+
+void setConnection(char *buffer, Rule *rules, int rules_number, int i, int j)
+{
+    int k;
+
+    rules[i].connection_weight[j] = atoi(strchr(buffer, ' '));
+    if(rules[i].connection_weight[j] == 0)
+        printf("The weight \"%s\" was evaluated to null. Like your IQ.\n", strchr(buffer, ' '));
+    strchr(buffer, ' ')[0]='\0';
+    for(k=0;k<rules_number; k++)
+    {
+        if(strcmp(buffer, rules[k].name)==0)
+            break;
+        else if(k+1==rules_number)
+        {
+            printf("The rule \"%s\" wasn't found. Like your brain.\n", buffer);
+            exit(1);
+        }
+    }
+    rules[i].connections[j] = k;
+}
+
+void setSymbol(char *buffer, Rule *rule, int j)
+{
+    rule->symbol_weight[j] = atoi(strchr(buffer, ' '));
+    if(rule->symbol_weight[j] == 0)
+        printf("The weight \"%s\" was evaluated to null. Like your skills.\n", strchr(buffer, ' '));
+    strchr(buffer, ' ')[0]='\0';
+    rule->symbols[j] = malloc(sizeof(char)*(strlen(buffer)+1));
+    strcpy(rule->symbols[j], buffer);
+}
+
+void generateName(Rule *rules, int length)
+{
+    int i,k,r,current_rule;
+    char buffer[1024];
+    buffer[0] = '\0';
+    current_rule = 0;
+    for(i=0; i<length;)
+    {
+        if(rules[current_rule].symbol_total_weight>0)
+        {   
+            r = rand()%(rules[current_rule].symbol_total_weight);
+            for(k=-1; r>=0; r-=rules[current_rule].symbol_weight[++k]);
+            strcat(buffer, rules[current_rule].symbols[k]);
+            i++;
+        }
+        if(rules[current_rule].connection_total_weight==0)
+            break;
+        r = rand()%(rules[current_rule].connection_total_weight);
+        for(k=-1; r>=0; r-=rules[current_rule].connection_weight[++k]);
+        current_rule = rules[current_rule].connections[k];
+    }
+    printf("%s\n", buffer);
+}
