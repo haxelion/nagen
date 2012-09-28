@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-c -Wall
 LDFLAGS=
-SOURCES=main.c word_generator.c
+SOURCES=main.c word_generator.c rule_generator.c
 OBJECTS=$(SOURCES:.c=.o)
 EXECUTABLE=nagen
 
@@ -12,6 +12,8 @@ $(EXECUTABLE): $(OBJECTS)
 .c.o:
 	$(CC) $(CFLAGS) $< -o $@
 
-.PHONY : clean
+.PHONY : clean stat
 clean:
 	rm *.o
+stat:
+	cat *.c *.h | wc
