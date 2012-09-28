@@ -10,11 +10,25 @@
 typedef struct
 {
     int mode;
-    char *symbol_file_name;
     int tolerance;
     int name_length;
     int name_number;
-    char *file_name;
-} arguments;
+    FILE *input_file;
+    FILE *symbol_file;
+    FILE *output_file;
+} Arguments;
+
+typedef struct
+{
+    char *name;
+    int connection_number;
+    int *connections;
+    int *connection_weight;
+    int connection_total_weight;
+    int symbol_number;
+    char **symbols;
+    int *symbol_weight;
+    int symbol_total_weight;
+} Rule;
 
 #endif

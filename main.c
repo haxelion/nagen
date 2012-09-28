@@ -1,12 +1,12 @@
 #include "nagen.h"
 #include "word_generator.h"
 
-arguments* processArguments(int argc, char**argv);
+Arguments* processArguments(int argc, char**argv);
 void printHelp();
 
 int main(int argc, char **argv)
 {
-    arguments *args;
+    Arguments *args;
     Rule *rules;
     int i;
     
@@ -18,9 +18,9 @@ int main(int argc, char **argv)
         for(i=0;i<args->name_number;i++)
         {
             if(args->name_length<1)
-                generateName(rules, 3+rand()%6);
+                generateName(args->output_file, rules, 3+rand()%6);
             else
-                generateName(rules, args->name_length);
+                generateName(args->output_file, rules, args->name_length);
         }
     }
     else if(args->mode == 1)
@@ -28,19 +28,26 @@ int main(int argc, char **argv)
         //rules = generateRules(args);
         //writeRules(rules, args);
     }
+    fclose(args->output_file);
     return 0;
 }
 
-arguments* processArguments(int argc, char**argv)
+Arguments* processArguments(int argc, char**argv)
 {
-    arguments *args = (arguments*) malloc(sizeof(arguments));
+    Arguments *args = (Arguments*) malloc(sizeof(Arguments));
     args->name_length = 0;
     args->name_number = 1;
     args->tolerance = 0;
+    args->output_file = stdout;
     int i;
     if(argc>1)
     {
-        args->file_name = argv[argc-1];
+        args->input_file = fopen(argv[argc-1], "r");
+        if(args->input_file == NULL)
+        {
+            printf("Input file %s not found.\n", argv[argc-1]);
+            exit(1);
+        }
         if(strcmp(argv[1], "-g") == 0)
         {
             args->mode = 1;
@@ -48,12 +55,27 @@ arguments* processArguments(int argc, char**argv)
             {
                 if(strcmp(argv[i], "-s") == 0)
                 {
-                    args->symbol_file_name = argv[i+1];
+                    args->symbol_file = fopen(argv[i+1], "r");
+                    if(args->symbol_file == NULL)
+                    {
+                        printf("Symbol file %s not found.\n", argv[i+1]);
+                        exit(1);
+                    }
                     i++;
                 }
                 else if(strcmp(argv[i], "-t") == 0)
                 {
                     args->tolerance = atoi(argv[i+1]);
+                    i++;
+                }
+                else if(strcmp(argv[i], "-o") == 0)
+                {
+                    args->output_file = fopen(argv[i+1], "w");
+                    if(args->output_file == NULL)
+                    {
+                        printf("Output file %s not found.\n", argv[i+1]);
+                        exit(1);
+                    }
                     i++;
                 }
                 else
@@ -75,6 +97,16 @@ arguments* processArguments(int argc, char**argv)
                     args->name_number = atoi(argv[i+1]);
                     i++;
                 }
+                else if(strcmp(argv[i], "-o") == 0)
+                {
+                    args->output_file = fopen(argv[i+1], "w");
+                    if(args->output_file == NULL)
+                    {
+                        printf("Output file %s not found.\n", argv[i+1]);
+                        exit(1);
+                    }
+                    i++;
+                }
                 else
                     printf("Unrecognized %s switch\n", argv[i]);
             }
@@ -91,6 +123,6 @@ arguments* processArguments(int argc, char**argv)
 void printHelp()
 {
     printf("\nNagen is a custom language random name generator.\n");
-    printf("Usage: nagen [-n numberofname] [-l lengthofname] languagefile\n");
-    printf("       nagen -g [-s symbolfile] [-t tolerance] wordlistfile\n");
+    printf("Usage: nagen [-n numberofname] [-l lengthofname] [-o outputfile] languagefile\n");
+    printf("       nagen -g [-s symbolfile] [-t tolerance] [-o outputfile] wordlistfile\n");
 }

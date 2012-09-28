@@ -54,23 +54,15 @@ int getLine(FILE *file, int length, char *buffer)
     return valid;
 }
 
-Rule* processRuleFile(arguments *args)
+Rule* processRuleFile(Arguments *args)
 {
-    FILE *file = NULL;
     int rules_number;
     Rule *rules;
-    
-    file = fopen(args->file_name, "r");
-    if(file == NULL)
-    {
-        printf("Rule file %s not found.\n", args->file_name);
-        exit(1);
-    }
-    rules_number = countRules(file);
+    rules_number = countRules(args->input_file);
     rules = malloc(sizeof(Rule)*rules_number);
-    initPass(file, rules, rules_number);
-    finalPass(file, rules, rules_number);
-    fclose(file);
+    initPass(args->input_file, rules, rules_number);
+    finalPass(args->input_file, rules, rules_number);
+    fclose(args->input_file);
     return rules;
 }
 
@@ -191,7 +183,7 @@ void setSymbol(char *buffer, Rule *rule, int j)
     strcpy(rule->symbols[j], buffer);
 }
 
-void generateName(Rule *rules, int length)
+void generateName(FILE *file,Rule *rules, int length)
 {
     int i,k,r,current_rule;
     char buffer[1024];
@@ -212,5 +204,5 @@ void generateName(Rule *rules, int length)
         for(k=-1; r>=0; r-=rules[current_rule].connection_weight[++k]);
         current_rule = rules[current_rule].connections[k];
     }
-    printf("%s\n", buffer);
+    fprintf(file,"%s\n", buffer);
 }
