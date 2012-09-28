@@ -56,11 +56,16 @@ int getLine(FILE *file, int length, char *buffer)
 
 Rule* processRuleFile(arguments *args)
 {
-    FILE *file;
+    FILE *file = NULL;
     int rules_number;
     Rule *rules;
     
     file = fopen(args->file_name, "r");
+    if(file == NULL)
+    {
+        printf("Rule file %s not found.\n", args->file_name);
+        exit(1);
+    }
     rules_number = countRules(file);
     rules = malloc(sizeof(Rule)*rules_number);
     initPass(file, rules, rules_number);
