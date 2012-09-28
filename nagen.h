@@ -1,3 +1,6 @@
+#ifndef NAGEN_H
+#define NAGEN_H
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -14,3 +17,4 @@ typedef struct
     char *file_name;
 } arguments;
 
+#endif

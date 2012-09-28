@@ -12,13 +12,21 @@ int main(int argc, char **argv)
     
     srand(time(NULL));
     args = processArguments(argc, argv);
-    rules = processRuleFile(args);
-    for(i=0;i<args->name_number;i++)
+    if(args->mode == 0)
     {
-        if(args->name_length<1)
-            generateName(rules, 3+rand()%6);
-        else
-            generateName(rules, args->name_length);
+        rules = processRuleFile(args);
+        for(i=0;i<args->name_number;i++)
+        {
+            if(args->name_length<1)
+                generateName(rules, 3+rand()%6);
+            else
+                generateName(rules, args->name_length);
+        }
+    }
+    else if(args->mode == 1)
+    {
+        //rules = generateRules(args);
+        //writeRules(rules, args);
     }
     return 0;
 }
@@ -28,6 +36,7 @@ arguments* processArguments(int argc, char**argv)
     arguments *args = (arguments*) malloc(sizeof(arguments));
     args->name_length = 0;
     args->name_number = 1;
+    args->tolerance = 0;
     int i;
     if(argc>1)
     {
@@ -35,7 +44,7 @@ arguments* processArguments(int argc, char**argv)
         if(strcmp(argv[1], "-g") == 0)
         {
             args->mode = 1;
-            for(i = 1; i<argc-1; i++)
+            for(i = 2; i<argc-1; i++)
             {
                 if(strcmp(argv[i], "-s") == 0)
                 {
