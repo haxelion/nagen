@@ -1,16 +1,4 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
-
-
-typedef struct
-{
-    int name_length;
-    int name_number;
-    char *file_name;
-} arguments;
-
+#include "nagen.h"
 
 typedef struct
 {

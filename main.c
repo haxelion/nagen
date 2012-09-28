@@ -1,7 +1,4 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
+#include "nagen.h"
 #include "word_generator.h"
 
 arguments* processArguments(int argc, char**argv);
@@ -35,20 +32,43 @@ arguments* processArguments(int argc, char**argv)
     if(argc>1)
     {
         args->file_name = argv[argc-1];
-        for(i = 1; i<argc-1; i++)
+        if(strcmp(argv[1], "-g") == 0)
         {
-            if(strcmp(argv[i], "-l") == 0)
+            args->mode = 1;
+            for(i = 1; i<argc-1; i++)
             {
-                args->name_length = atoi(argv[i+1]);
-                i++;
+                if(strcmp(argv[i], "-s") == 0)
+                {
+                    args->symbol_file_name = argv[i+1];
+                    i++;
+                }
+                else if(strcmp(argv[i], "-t") == 0)
+                {
+                    args->tolerance = atoi(argv[i+1]);
+                    i++;
+                }
+                else
+                    printf("Unrecognized %s switch\n", argv[i]);
             }
-            else if(strcmp(argv[i], "-n") == 0)
+        }
+        else
+        {
+            args->mode = 0;
+            for(i = 1; i<argc-1; i++)
             {
-                args->name_number = atoi(argv[i+1]);
-                i++;
+                if(strcmp(argv[i], "-l") == 0)
+                {
+                    args->name_length = atoi(argv[i+1]);
+                    i++;
+                }
+                else if(strcmp(argv[i], "-n") == 0)
+                {
+                    args->name_number = atoi(argv[i+1]);
+                    i++;
+                }
+                else
+                    printf("Unrecognized %s switch\n", argv[i]);
             }
-            else
-                printf("Unrecognized %s switch\n", argv[i]);
         }
     }
     else
@@ -62,5 +82,6 @@ arguments* processArguments(int argc, char**argv)
 void printHelp()
 {
     printf("\nNagen is a custom language random name generator.\n");
-    printf("\nUsage: nagen [-n numberofname] [-l lengthofname] languagefile\n\n");
+    printf("Usage: nagen [-n numberofname] [-l lengthofname] languagefile\n");
+    printf("       nagen -g [-s symbolfile] [-t tolerance] wordlistfile\n");
 }
