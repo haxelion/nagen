@@ -1,9 +1,8 @@
 #include "nagen.h"
 
 
-int blank(char *buffer);
 int interpret(char *buffer);
-int getLine(FILE *file, int length, char *buffer);
+int extractLine(FILE *file, int length, char *buffer);
 Rule* processRuleFile(Arguments *args);
 int countRules(FILE *file);
 void initPass(FILE *file, Rule *rules, int rules_number); 

@@ -10,6 +10,7 @@ int generateRules(Arguments *args, Rule * rules)
     int rules_number;
 
     symbols_number = countSymbols(args->symbol_file);
+    symbols = (char**) malloc(sizeof(char*)*symbols_number);
     loadSymbols(args->symbol_file, symbols, symbols_number);
     frequency = (int**)malloc(sizeof(int*)*symbols_number);
     for(i=0;i<symbols_number; i++)
@@ -34,16 +35,12 @@ int countSymbols(FILE *file)
 void loadSymbols(FILE *file, char **symbols, int symbols_number)
 {
     char buffer[BUFFER_LENGTH];
-    int i, j;
+    int i;
 
     fseek(file, 0, SEEK_SET);
-    symbols = (char**) malloc(sizeof(char*)*symbols_number);
     for(i=0; i<symbols_number; i++)
     {
-        fgets(buffer, BUFFER_LENGTH, file);
-        for(j=0; buffer[j] != '\0'; j++)
-            if((buffer[j] == '\n')||(buffer[j] == '\r')||(buffer[j] == '\t'))
-                buffer[j] = '\0';
+        getLine(buffer, BUFFER_LENGTH, file);
         symbols[i] = (char*)malloc(sizeof(char)*(strlen(buffer)+1));
         strcpy(symbols[i], buffer);
     }
@@ -67,4 +64,9 @@ void sortByLength(char **symbols, int symbols_number)
         symbols[i] = symbols[max_i];
         symbols[max_i] = temp;
     }
+}
+
+int calculateFrequency(FILE *file, char **symbols, int **frequency, int symbols_number)
+{
+
 }

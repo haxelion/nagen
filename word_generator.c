@@ -1,13 +1,5 @@
 #include "word_generator.h"
 
-int blank(char *buffer)
-{
-    int i;
-    for(i=0;buffer[i]!='\0'; i++)
-        if(buffer[i]>32)
-            return 0;
-    return 1;
-}
 
 int interpret(char *buffer)
 {
@@ -31,19 +23,16 @@ int interpret(char *buffer)
 }
 
 
-int getLine(FILE *file, int length, char *buffer)
+int extractLine(FILE *file, int length, char *buffer)
 {
     int valid = -1;
     while(valid==-1)
     {
-        if(fgets(buffer, length, file)!=NULL)
+        if(getLine(buffer, length, file)!=NULL)
         {
-            if(!blank(buffer))
-            {
-                valid = interpret(buffer);
-                if(valid == -2)
-                    printf("Line \"%s\" has no meaning. Like your life.\n", buffer);
-            }
+            valid = interpret(buffer);
+            if(valid == -2)
+                printf("Line \"%s\" has no meaning. Like your life.\n", buffer);
         }
         else
         {
@@ -75,7 +64,7 @@ int countRules(FILE *file)
     fseek(file, 0, SEEK_SET);
     do
     {
-        c = getLine(file, BUFFER_LENGTH, buffer);
+        c = extractLine(file, BUFFER_LENGTH, buffer);
         if(c=='[')
             rules_number++;
     }while(c!=0);
@@ -89,19 +78,19 @@ void initPass(FILE *file, Rule *rules, int rules_number)
     int count;
 
     fseek(file, 0, SEEK_SET);
-    c = getLine(file, BUFFER_LENGTH, buffer);
+    c = extractLine(file, BUFFER_LENGTH, buffer);
     for(i=0; i<rules_number;i++)
     {
         while(c!='[')
-            c = getLine(file, BUFFER_LENGTH, buffer);
+            c = extractLine(file, BUFFER_LENGTH, buffer);
         rules[i].name = malloc(strlen(buffer)+1);
         strcpy(rules[i].name, buffer);
         count = 0;
-        c = getLine(file, BUFFER_LENGTH, buffer);
+        c = extractLine(file, BUFFER_LENGTH, buffer);
         while(c=='-')
         {
             count++;
-            c = getLine(file, BUFFER_LENGTH, buffer);
+            c = extractLine(file, BUFFER_LENGTH, buffer);
         }
         rules[i].connection_number = count;
         rules[i].connections = (int*) malloc(sizeof(int)*count);
@@ -111,7 +100,7 @@ void initPass(FILE *file, Rule *rules, int rules_number)
         while(c=='*')
         {
             count++;
-            c=getLine(file, BUFFER_LENGTH, buffer);
+            c=extractLine(file, BUFFER_LENGTH, buffer);
         }
         rules[i].symbol_number = count;
         rules[i].symbol_weight = (int*) malloc(sizeof(int)*count);
@@ -125,21 +114,21 @@ void finalPass(FILE *file, Rule *rules, int rules_number)
     int i, j, c;
     
     fseek(file, 0, SEEK_SET);
-    c = getLine(file, BUFFER_LENGTH, buffer);
+    c = extractLine(file, BUFFER_LENGTH, buffer);
     for(i=0; i<rules_number;i++)
     {
         while(c!='-')
-            c = getLine(file, BUFFER_LENGTH, buffer);
+            c = extractLine(file, BUFFER_LENGTH, buffer);
         for(j=0; j<rules[i].connection_number; j++)
         {
             setConnection(buffer, rules, rules_number, i, j);
-            c = getLine(file, BUFFER_LENGTH, buffer);
+            c = extractLine(file, BUFFER_LENGTH, buffer);
         }
 
         for(j=0; j<rules[i].symbol_number; j++)
         {
             setSymbol(buffer, &rules[i], j);
-            c = getLine(file, BUFFER_LENGTH, buffer);
+            c = extractLine(file, BUFFER_LENGTH, buffer);
         }
         
         rules[i].connection_total_weight = 0;

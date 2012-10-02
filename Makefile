@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-c -Wall
 LDFLAGS=
-SOURCES=main.c word_generator.c rule_generator.c
+SOURCES=main.c word_generator.c rule_generator.c nagen.c
 OBJECTS=$(SOURCES:.c=.o)
 EXECUTABLE=nagen
 

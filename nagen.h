@@ -32,4 +32,7 @@ typedef struct
     int symbol_total_weight;
 } Rule;
 
+int blank(char *buffer);
+int getLine(char *buffer, int size, FILE *file);
+
 #endif
