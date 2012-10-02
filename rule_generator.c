@@ -34,15 +34,37 @@ int countSymbols(FILE *file)
 void loadSymbols(FILE *file, char **symbols, int symbols_number)
 {
     char buffer[BUFFER_LENGTH];
-    int i;
+    int i, j;
 
     fseek(file, 0, SEEK_SET);
     symbols = (char**) malloc(sizeof(char*)*symbols_number);
     for(i=0; i<symbols_number; i++)
     {
         fgets(buffer, BUFFER_LENGTH, file);
+        for(j=0; buffer[j] != '\0'; j++)
+            if((buffer[j] == '\n')||(buffer[j] == '\r')||(buffer[j] == '\t'))
+                buffer[j] = '\0';
         symbols[i] = (char*)malloc(sizeof(char)*(strlen(buffer)+1));
         strcpy(symbols[i], buffer);
     }
-    //sortByLength(char **symbols, int symbols_number);
+    sortByLength(symbols, symbols_number);
+}
+
+void sortByLength(char **symbols, int symbols_number)
+{
+    int max_length, max_i;
+    int i, j;
+    char *temp;
+
+    for(i=0; i<symbols_number; i++)
+    {        
+        max_length = strlen(symbols[i]);
+        max_i = i;
+        for(j=i+1; j<symbols_number; j++)
+            if(strlen(symbols[j])>max_length)
+                max_i = j;
+        temp = symbols[i];
+        symbols[i] = symbols[max_i];
+        symbols[max_i] = temp;
+    }
 }
