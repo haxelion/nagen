@@ -68,14 +68,14 @@ Rule* processRuleFile(Arguments *args)
 
 int countRules(FILE *file)
 {
-    char buffer[256];
+    char buffer[BUFFER_LENGTH];
     int c;
     int rules_number = 0;
 
     fseek(file, 0, SEEK_SET);
     do
     {
-        c = getLine(file, 256, buffer);
+        c = getLine(file, BUFFER_LENGTH, buffer);
         if(c=='[')
             rules_number++;
     }while(c!=0);
@@ -84,24 +84,24 @@ int countRules(FILE *file)
 
 void initPass(FILE *file, Rule *rules, int rules_number) 
 {
-    char buffer[256];
+    char buffer[BUFFER_LENGTH];
     int i, c;
     int count;
 
     fseek(file, 0, SEEK_SET);
-    c = getLine(file, 256, buffer);
+    c = getLine(file, BUFFER_LENGTH, buffer);
     for(i=0; i<rules_number;i++)
     {
         while(c!='[')
-            c = getLine(file, 256, buffer);
+            c = getLine(file, BUFFER_LENGTH, buffer);
         rules[i].name = malloc(strlen(buffer)+1);
         strcpy(rules[i].name, buffer);
         count = 0;
-        c = getLine(file, 256, buffer);
+        c = getLine(file, BUFFER_LENGTH, buffer);
         while(c=='-')
         {
             count++;
-            c = getLine(file, 256, buffer);
+            c = getLine(file, BUFFER_LENGTH, buffer);
         }
         rules[i].connection_number = count;
         rules[i].connections = (int*) malloc(sizeof(int)*count);
@@ -111,7 +111,7 @@ void initPass(FILE *file, Rule *rules, int rules_number)
         while(c=='*')
         {
             count++;
-            c=getLine(file, 256, buffer);
+            c=getLine(file, BUFFER_LENGTH, buffer);
         }
         rules[i].symbol_number = count;
         rules[i].symbol_weight = (int*) malloc(sizeof(int)*count);
@@ -121,25 +121,25 @@ void initPass(FILE *file, Rule *rules, int rules_number)
 
 void finalPass(FILE *file, Rule *rules, int rules_number) 
 {
-    char buffer[256];
+    char buffer[BUFFER_LENGTH];
     int i, j, c;
     
     fseek(file, 0, SEEK_SET);
-    c = getLine(file, 256, buffer);
+    c = getLine(file, BUFFER_LENGTH, buffer);
     for(i=0; i<rules_number;i++)
     {
         while(c!='-')
-            c = getLine(file, 256, buffer);
+            c = getLine(file, BUFFER_LENGTH, buffer);
         for(j=0; j<rules[i].connection_number; j++)
         {
             setConnection(buffer, rules, rules_number, i, j);
-            c = getLine(file, 256, buffer);
+            c = getLine(file, BUFFER_LENGTH, buffer);
         }
 
         for(j=0; j<rules[i].symbol_number; j++)
         {
             setSymbol(buffer, &rules[i], j);
-            c = getLine(file, 256, buffer);
+            c = getLine(file, BUFFER_LENGTH, buffer);
         }
         
         rules[i].connection_total_weight = 0;

@@ -6,6 +6,7 @@
 #include <string.h>
 #include <time.h>
 
+#define BUFFER_LENGTH 256
 
 typedef struct
 {

@@ -8,6 +8,7 @@ int main(int argc, char **argv)
 {
     Arguments *args;
     Rule *rules;
+    int rules_number;
     int i;
     
     srand(time(NULL));
@@ -25,8 +26,8 @@ int main(int argc, char **argv)
     }
     else if(args->mode == 1)
     {
-        //rules = generateRules(args);
-        //writeRules(rules, args);
+        //rules_number = generateRules(args, rules);
+        //writeRules(rules, rules_number, args->output_file);
     }
     fclose(args->output_file);
     return 0;
