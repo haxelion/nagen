@@ -20,9 +20,8 @@ int generateRules(Arguments *args, Rule * rules)
             frequency[i][j] = 0;
     }  
 
-   total_count = calculateFrequency(args->input_file, symbols, frequency, symbols_number);
-    //rules_number = setRuleSymbols(symbols, frequency, symbols_number, args->tolerance);
-    //connectRules(rules, frequency, symbols, symbol_number);
+    total_count = calculateFrequency(args->input_file, symbols, frequency, symbols_number);
+    //rules_number = buildRules(symbols, frequency, symbols_number, args->tolerance, rules);
     return rules_number;
 }
 
@@ -120,4 +119,25 @@ int findSymbols(char *buffer, char **symbols, int symbols_number, int *found_sym
         }
     }
     return a;
+}
+
+int buildRules(char **symbols, int **frequency, int symbols_number, int tolerance, Rule *rules)
+{
+    int *groups;
+    int groups_number;
+    int i, j;
+
+    groups = malloc(sizeof(int)*symbols_number);
+    for(i=0; i<symbols_number; i++)
+        groups[i] = i;
+    for(i=0; i<symbols_number; i++)
+        if(groups[i] == i)
+            for(j=i+1; j<symbols_number; j++)
+                if(groups[j] == j)
+                    //if(isSimilar(frequency, i, j, tolerance) == 1)
+                        groups[j] = groups[i];
+    //DEBUG
+    for(i=0;i<symbols_number; i++)
+        printf("%d\n", groups[i]);
+    //groups_number = countGroups(groups, symbols_number);
 }
