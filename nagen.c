@@ -17,7 +17,7 @@ int getLine(char *buffer, int size, FILE *file)
     while(valid == 0)
     {
         if(fgets(buffer, BUFFER_LENGTH, file)==NULL)
-            return NULL;
+            return 0;
         if(blank(buffer) == 0)
             valid = 1;
     }
