@@ -66,7 +66,7 @@ Arguments* processArguments(int argc, char**argv)
                 }
                 else if(strcmp(argv[i], "-t") == 0)
                 {
-                    args->tolerance = atoi(argv[i+1]);
+                    args->tolerance = atof(argv[i+1]);
                     i++;
                 }
                 else if(strcmp(argv[i], "-o") == 0)

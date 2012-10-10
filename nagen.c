@@ -5,7 +5,7 @@ int blank(char *buffer)
 {
     int i;
     for(i=0;buffer[i]!='\0'; i++)
-        if(buffer[i]>32)
+        if((unsigned char)buffer[i]>32)
             return 0;
     return 1;
 }

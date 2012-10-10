@@ -11,7 +11,7 @@
 typedef struct
 {
     int mode;
-    int tolerance;
+    float tolerance;
     int name_length;
     int name_number;
     FILE *input_file;

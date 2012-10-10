@@ -21,7 +21,7 @@ int generateRules(Arguments *args, Rule * rules)
     }  
 
     total_count = calculateFrequency(args->input_file, symbols, frequency, symbols_number);
-    //rules_number = buildRules(symbols, frequency, symbols_number, args->tolerance, rules);
+    rules_number = buildRules(symbols, frequency, symbols_number, args->tolerance, rules);
     return rules_number;
 }
 
@@ -121,7 +121,7 @@ int findSymbols(char *buffer, char **symbols, int symbols_number, int *found_sym
     return a;
 }
 
-int buildRules(char **symbols, int **frequency, int symbols_number, int tolerance, Rule *rules)
+int buildRules(char **symbols, int **frequency, int symbols_number, float tolerance, Rule *rules)
 {
     int *groups;
     int groups_number;
@@ -134,10 +134,58 @@ int buildRules(char **symbols, int **frequency, int symbols_number, int toleranc
         if(groups[i] == i)
             for(j=i+1; j<symbols_number; j++)
                 if(groups[j] == j)
-                    //if(isSimilar(frequency, i, j, tolerance) == 1)
+                    if(isSimilar(frequency, symbols_number, i, j, tolerance) == 1)
                         groups[j] = groups[i];
     //DEBUG
     for(i=0;i<symbols_number; i++)
-        printf("%d\n", groups[i]);
+        printf("%s : %d\n", symbols[i], groups[i]);
+    return 0;
     //groups_number = countGroups(groups, symbols_number);
+}
+
+int isSimilar(int **frequency, int symbols_number, int i, int j, float tolerance)
+{
+    int k;
+    int total_i=0, total_j=0;
+    int tolerance_i, tolerance_j;
+    float factor;
+
+    
+    for(k=0; k<symbols_number; k++)
+    {
+        total_i += frequency[i][k];
+        total_j += frequency[j][k];
+    }
+    tolerance_i = (int)(total_i*tolerance);
+    tolerance_j = (int)(total_j*tolerance);
+    for(k=0; k<symbols_number; k++)
+    {
+        if(frequency[j][k]+tolerance_j<frequency[i][k]-tolerance_i)
+            return 0;
+        if(frequency[j][k]-tolerance_j>frequency[i][k]+tolerance_i)
+            return 0;
+    }
+
+    total_i = 0;
+    total_j = 0;
+    for(k=0; k<symbols_number; k++)
+    {
+        total_i += frequency[k][i];
+        total_j += frequency[k][j];
+    }
+    tolerance_i = (int)(total_i*tolerance);
+    tolerance_j = (int)(total_j*tolerance);
+    if(total_j == 0)
+        factor = 1.0f;
+    else
+        factor = (float)total_i/total_j;
+    for(k=0; k<symbols_number; k++)
+    {
+        if((frequency[k][j]+tolerance_j)*factor<frequency[k][i]-tolerance_i)
+            return 0;
+        if((frequency[k][j]-tolerance_j)*factor>frequency[k][i]+tolerance_i)
+            return 0;
+    }
+    return 1;
+
 }
