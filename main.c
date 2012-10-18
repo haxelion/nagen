@@ -26,8 +26,8 @@ int main(int argc, char **argv)
     }
     else if(args->mode == 1)
     {
-        rules_number = generateRules(args, rules);
-        //writeRules(rules, rules_number, args->output_file);
+        rules = generateRules(args, &rules_number);
+        writeRules(rules, rules_number, args->output_file);
     }
     fclose(args->output_file);
     return 0;

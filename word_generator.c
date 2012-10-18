@@ -117,8 +117,9 @@ void finalPass(FILE *file, Rule *rules, int rules_number)
     c = extractLine(file, BUFFER_LENGTH, buffer);
     for(i=0; i<rules_number;i++)
     {
-        while(c!='-')
+        while(c!='[')
             c = extractLine(file, BUFFER_LENGTH, buffer);
+        c = extractLine(file, BUFFER_LENGTH, buffer);
         for(j=0; j<rules[i].connections_number; j++)
         {
             setConnection(buffer, rules, rules_number, i, j);

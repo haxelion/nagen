@@ -1,13 +1,13 @@
 #include "rule_generator.h"
 
-int generateRules(Arguments *args, Rule * rules)
+Rule* generateRules(Arguments *args, int *rules_number)
 {
     char **symbols;
     int symbols_number;
     int **frequency;
     int total_count;
     int i,j;
-    int rules_number;
+    Rule *rules;
 
     symbols_number = countSymbols(args->symbol_file);
     symbols = (char**) malloc(sizeof(char*)*symbols_number);
@@ -21,8 +21,10 @@ int generateRules(Arguments *args, Rule * rules)
     }  
 
     total_count = calculateFrequency(args->input_file, symbols, frequency, symbols_number);
-    rules_number = buildRules(symbols, frequency, symbols_number, args->tolerance, rules);
-    return rules_number;
+    *rules_number = symbols_number;
+    rules = (Rule*) malloc(sizeof(Rule)*symbols_number);
+    buildRules(symbols, frequency, symbols_number, args->tolerance, rules);
+    return rules;
 }
 
 int countSymbols(FILE *file)
@@ -111,7 +113,10 @@ int findSymbols(char *buffer, char **symbols, int symbols_number, int *found_sym
             }
         } 
         if(equal == 0)
-            printf("Symbol '%c' not found and has been skipped.\n", buffer[i]);
+        {
+            printf("Line \"%s\" contains an unknown symbol at %d and was dropped.\n", buffer, i);
+            return 0;
+        }
         else
         {
             found_symbols[a++] = j-1;   
@@ -121,71 +126,49 @@ int findSymbols(char *buffer, char **symbols, int symbols_number, int *found_sym
     return a;
 }
 
-int buildRules(char **symbols, int **frequency, int symbols_number, float tolerance, Rule *rules)
+void buildRules(char **symbols, int **frequency, int symbols_number, float tolerance, Rule *rules)
 {
-    int *groups;
-    int groups_number;
-    int i, j;
-
-    groups = malloc(sizeof(int)*symbols_number);
+    int i, j, k;
+    
     for(i=0; i<symbols_number; i++)
-        groups[i] = i;
-    for(i=0; i<symbols_number; i++)
-        if(groups[i] == i)
-            for(j=i+1; j<symbols_number; j++)
-                if(groups[j] == j)
-                    if(isSimilar(frequency, symbols_number, i, j, tolerance) == 1)
-                        groups[j] = groups[i];
-    //DEBUG
-    for(i=0;i<symbols_number; i++)
-        printf("%s : %d\n", symbols[i], groups[i]);
-    return 0;
-    //groups_number = countGroups(groups, symbols_number);
+    {
+        rules[i].name = (char*)malloc(sizeof(char)*(strlen(symbols[i])+1));
+        rules[i].symbols_number = 1;
+        rules[i].symbols = (char**)malloc(sizeof(char*)*1);
+        rules[i].symbols[0] = malloc(sizeof(char)*(strlen(symbols[i])+1));
+        rules[i].symbols_weight = (int*)malloc(sizeof(int)*1);
+        rules[i].symbols_weight[0] = 1;
+        strcpy(rules[i].symbols[0], symbols[i]);
+        strcpy(rules[i].name, symbols[i]);
+        rules[i].connections_number = 0;
+        for(j=0; j<symbols_number; j++)
+            if(frequency[i][j]>0)
+                rules[i].connections_number++;
+        rules[i].connections = (int*)malloc(sizeof(int)*rules[i].connections_number);
+        rules[i].connections_weight = (int*)malloc(sizeof(int)*rules[i].connections_number);
+        k=0;
+        for(j=0; j<symbols_number; j++)
+            if(frequency[i][j]>0)
+            {
+                rules[i].connections_weight[k] = frequency[i][j];
+                rules[i].connections[k] = j;
+                k++;
+            }
+    }
 }
 
-int isSimilar(int **frequency, int symbols_number, int i, int j, float tolerance)
+void writeRules(Rule* rules, int rules_number, FILE *file)
 {
-    int k;
-    int total_i=0, total_j=0;
-    int tolerance_i, tolerance_j;
-    float factor;
+    int i, j;
 
-    
-    for(k=0; k<symbols_number; k++)
+    for(i=0; i<rules_number; i++)
     {
-        total_i += frequency[i][k];
-        total_j += frequency[j][k];
-    }
-    tolerance_i = (int)(total_i*tolerance);
-    tolerance_j = (int)(total_j*tolerance);
-    for(k=0; k<symbols_number; k++)
-    {
-        if(frequency[j][k]+tolerance_j<frequency[i][k]-tolerance_i)
-            return 0;
-        if(frequency[j][k]-tolerance_j>frequency[i][k]+tolerance_i)
-            return 0;
-    }
+        fprintf(file, "[%s]\n", rules[i].name);
+        for(j=0;j<rules[i].connections_number; j++)
+            fprintf(file, "-%s %d\n", rules[rules[i].connections[j]].name, rules[i].connections_weight[j]);
+        for(j=0;j<rules[i].symbols_number; j++)
+            fprintf(file, "*%s %d\n", rules[i].symbols[j], rules[i].symbols_weight[j]);
 
-    total_i = 0;
-    total_j = 0;
-    for(k=0; k<symbols_number; k++)
-    {
-        total_i += frequency[k][i];
-        total_j += frequency[k][j];
+        fprintf(file, "\n");
     }
-    tolerance_i = (int)(total_i*tolerance);
-    tolerance_j = (int)(total_j*tolerance);
-    if(total_j == 0)
-        factor = 1.0f;
-    else
-        factor = (float)total_i/total_j;
-    for(k=0; k<symbols_number; k++)
-    {
-        if((frequency[k][j]+tolerance_j)*factor<frequency[k][i]-tolerance_i)
-            return 0;
-        if((frequency[k][j]-tolerance_j)*factor>frequency[k][i]+tolerance_i)
-            return 0;
-    }
-    return 1;
-
 }
