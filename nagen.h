@@ -22,14 +22,14 @@ typedef struct
 typedef struct
 {
     char *name;
-    int connection_number;
+    int connections_number;
     int *connections;
-    int *connection_weight;
-    int connection_total_weight;
-    int symbol_number;
+    int *connections_weight;
+    int connections_total_weight;
+    int symbols_number;
     char **symbols;
-    int *symbol_weight;
-    int symbol_total_weight;
+    int *symbols_weight;
+    int symbols_total_weight;
 } Rule;
 
 int blank(char *buffer);

@@ -92,9 +92,9 @@ void initPass(FILE *file, Rule *rules, int rules_number)
             count++;
             c = extractLine(file, BUFFER_LENGTH, buffer);
         }
-        rules[i].connection_number = count;
+        rules[i].connections_number = count;
         rules[i].connections = (int*) malloc(sizeof(int)*count);
-        rules[i].connection_weight = (int*) malloc(sizeof(int)*count);
+        rules[i].connections_weight = (int*) malloc(sizeof(int)*count);
         
         count = 0;
         while(c=='*')
@@ -102,8 +102,8 @@ void initPass(FILE *file, Rule *rules, int rules_number)
             count++;
             c=extractLine(file, BUFFER_LENGTH, buffer);
         }
-        rules[i].symbol_number = count;
-        rules[i].symbol_weight = (int*) malloc(sizeof(int)*count);
+        rules[i].symbols_number = count;
+        rules[i].symbols_weight = (int*) malloc(sizeof(int)*count);
         rules[i].symbols = (char**) malloc(sizeof(char*)*count);
     }
 }
@@ -119,25 +119,25 @@ void finalPass(FILE *file, Rule *rules, int rules_number)
     {
         while(c!='-')
             c = extractLine(file, BUFFER_LENGTH, buffer);
-        for(j=0; j<rules[i].connection_number; j++)
+        for(j=0; j<rules[i].connections_number; j++)
         {
             setConnection(buffer, rules, rules_number, i, j);
             c = extractLine(file, BUFFER_LENGTH, buffer);
         }
 
-        for(j=0; j<rules[i].symbol_number; j++)
+        for(j=0; j<rules[i].symbols_number; j++)
         {
             setSymbol(buffer, &rules[i], j);
             c = extractLine(file, BUFFER_LENGTH, buffer);
         }
         
-        rules[i].connection_total_weight = 0;
-        for(j=0;j<rules[i].connection_number;j++)
-            rules[i].connection_total_weight+=rules[i].connection_weight[j];
+        rules[i].connections_total_weight = 0;
+        for(j=0;j<rules[i].connections_number;j++)
+            rules[i].connections_total_weight+=rules[i].connections_weight[j];
 
-        rules[i].symbol_total_weight = 0;
-        for(j=0;j<rules[i].symbol_number;j++)
-            rules[i].symbol_total_weight+=rules[i].symbol_weight[j];
+        rules[i].symbols_total_weight = 0;
+        for(j=0;j<rules[i].symbols_number;j++)
+            rules[i].symbols_total_weight+=rules[i].symbols_weight[j];
     }
 }
 
@@ -145,8 +145,8 @@ void setConnection(char *buffer, Rule *rules, int rules_number, int i, int j)
 {
     int k;
 
-    rules[i].connection_weight[j] = atoi(strchr(buffer, ' '));
-    if(rules[i].connection_weight[j] == 0)
+    rules[i].connections_weight[j] = atoi(strchr(buffer, ' '));
+    if(rules[i].connections_weight[j] == 0)
         printf("The weight \"%s\" was evaluated to null. Like your IQ.\n", strchr(buffer, ' '));
     strchr(buffer, ' ')[0]='\0';
     for(k=0;k<rules_number; k++)
@@ -164,8 +164,8 @@ void setConnection(char *buffer, Rule *rules, int rules_number, int i, int j)
 
 void setSymbol(char *buffer, Rule *rule, int j)
 {
-    rule->symbol_weight[j] = atoi(strchr(buffer, ' '));
-    if(rule->symbol_weight[j] == 0)
+    rule->symbols_weight[j] = atoi(strchr(buffer, ' '));
+    if(rule->symbols_weight[j] == 0)
         printf("The weight \"%s\" was evaluated to null. Like your skills.\n", strchr(buffer, ' '));
     strchr(buffer, ' ')[0]='\0';
     rule->symbols[j] = malloc(sizeof(char)*(strlen(buffer)+1));
@@ -180,17 +180,17 @@ void generateName(FILE *file,Rule *rules, int length)
     current_rule = 0;
     for(i=0; i<length;)
     {
-        if(rules[current_rule].symbol_total_weight>0)
+        if(rules[current_rule].symbols_total_weight>0)
         {   
-            r = rand()%(rules[current_rule].symbol_total_weight);
-            for(k=-1; r>=0; r-=rules[current_rule].symbol_weight[++k]);
+            r = rand()%(rules[current_rule].symbols_total_weight);
+            for(k=-1; r>=0; r-=rules[current_rule].symbols_weight[++k]);
             strcat(buffer, rules[current_rule].symbols[k]);
             i++;
         }
-        if(rules[current_rule].connection_total_weight==0)
+        if(rules[current_rule].connections_total_weight==0)
             break;
-        r = rand()%(rules[current_rule].connection_total_weight);
-        for(k=-1; r>=0; r-=rules[current_rule].connection_weight[++k]);
+        r = rand()%(rules[current_rule].connections_total_weight);
+        for(k=-1; r>=0; r-=rules[current_rule].connections_weight[++k]);
         current_rule = rules[current_rule].connections[k];
     }
     fprintf(file,"%s\n", buffer);
