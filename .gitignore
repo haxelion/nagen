@@ -1,3 +1,4 @@
 nagen
 *.swp
 *.o
+test/*
