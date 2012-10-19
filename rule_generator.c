@@ -10,10 +10,10 @@ Rule* generateRules(Arguments *args, int *rules_number)
     Rule *rules;
 
     symbols_number = countSymbols(args->symbol_file);
-    symbols = (char**) malloc(sizeof(char*)*symbols_number);
+    symbols = (char**) malloc(sizeof(char*)*(symbols_number+1));
     loadSymbols(args->symbol_file, symbols, symbols_number);
-    frequency = (int**)malloc(sizeof(int*)*symbols_number);
-    for(i=0;i<symbols_number; i++)
+    frequency = (int**)malloc(sizeof(int*)*(symbols_number+1));
+    for(i=0;i<symbols_number+1; i++)
     {
         frequency[i] = (int*)malloc(sizeof(int)*symbols_number);
         for(j=0; j<symbols_number; j++)
@@ -21,8 +21,8 @@ Rule* generateRules(Arguments *args, int *rules_number)
     }  
 
     total_count = calculateFrequency(args->input_file, symbols, frequency, symbols_number);
-    *rules_number = symbols_number;
-    rules = (Rule*) malloc(sizeof(Rule)*symbols_number);
+    *rules_number = symbols_number+1;
+    rules = (Rule*) malloc(sizeof(Rule)*(symbols_number+1));
     buildRules(symbols, frequency, symbols_number, args->tolerance, rules);
     return rules;
 }
@@ -50,6 +50,8 @@ void loadSymbols(FILE *file, char **symbols, int symbols_number)
         symbols[i] = (char*)malloc(sizeof(char)*(strlen(buffer)+1));
         strcpy(symbols[i], buffer);
     }
+    symbols[symbols_number] = (char*)malloc(sizeof(char));
+    symbols[symbols_number][0] = '\0';
     sortByLength(symbols, symbols_number);
 }
 
@@ -95,7 +97,8 @@ int calculateFrequency(FILE *file, char **symbols, int **frequency, int symbols_
 int findSymbols(char *buffer, char **symbols, int symbols_number, int *found_symbols)
 {
     int i, j, k, equal;
-    int a=0;
+    int a=1;
+    found_symbols[0] = symbols_number;
 
     for(i=0; buffer[i]!='\0'; i++)
     {
@@ -130,7 +133,7 @@ void buildRules(char **symbols, int **frequency, int symbols_number, float toler
 {
     int i, j, k;
     
-    for(i=0; i<symbols_number; i++)
+    for(i=0; i<symbols_number+1; i++)
     {
         rules[i].name = (char*)malloc(sizeof(char)*(strlen(symbols[i])+1));
         rules[i].symbols_number = 1;
@@ -161,7 +164,7 @@ void writeRules(Rule* rules, int rules_number, FILE *file)
 {
     int i, j;
 
-    for(i=0; i<rules_number; i++)
+    for(i=rules_number-1; i>=0; i--)
     {
         fprintf(file, "[%s]\n", rules[i].name);
         for(j=0;j<rules[i].connections_number; j++)
