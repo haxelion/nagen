@@ -45,7 +45,7 @@ You can try it out with the example.lg language file.
 ### 4.1. Basic concepts
 
 The language file is composed of several rules. Each rule use a group of 
-symbols. A symbol is a string of characters, like a voyel or a syllabe.
+symbols. A symbol is a string of characters, like a voyel or a syllable.
 
 A rule define two things: a group of symbols and a list of connections to other 
 rules, each with a probability weight.
@@ -121,13 +121,14 @@ inefficient way of writing bigrams.
 It simply try to transform each word from the word list in a succession of
 symbols from the symbol file and then count the bigrams. The transformation
 algorithm is really simple but error prone: it simply moves through the word
-trying to fit the biggest symbol it can and, if it fail, it just drop the whole
-word with an error message. No fancy backtracking to find the best solution.
+trying to fit the biggest symbol it can and, if it fails, it just drops the 
+whole word with an error message. No fancy backtracking to find the best
+solution.
 
 The command to use it is :
 `nagen -s symbolfile [-o outputfile] wordlistfile`
 
-- -s symbolfile: A file containing a symbol list, each symbol on one line, which
+- -s symbolfile: a file containing a symbol list, each symbol on one line, which
     will be analyzed.
 
 - -o outputfile: the file where you to put the generated rules. It defaults to 
@@ -136,7 +137,7 @@ The command to use it is :
 - wordlistfile: the file containing the word list, each word on one line, to
     analyze.
 
-## 7. License
+## 6. License
 
 This file is part of nagen.
 
