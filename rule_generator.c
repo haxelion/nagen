@@ -23,7 +23,6 @@ Rule* generateRules(Arguments *args, int *rules_number)
     char **symbols;
     int symbols_number;
     int **frequency;
-    int total_count;
     int i,j;
     Rule *rules;
 
@@ -38,10 +37,10 @@ Rule* generateRules(Arguments *args, int *rules_number)
             frequency[i][j] = 0;
     }  
 
-    total_count = calculateFrequency(args->input_file, symbols, frequency, symbols_number);
+    calculateFrequency(args->input_file, symbols, frequency, symbols_number);
     *rules_number = symbols_number+1;
     rules = (Rule*) malloc(sizeof(Rule)*(symbols_number+1));
-    buildRules(symbols, frequency, symbols_number, args->tolerance, rules);
+    buildRules(symbols, frequency, symbols_number, rules);
     return rules;
 }
 
@@ -147,7 +146,7 @@ int findSymbols(char *buffer, char **symbols, int symbols_number, int *found_sym
     return a;
 }
 
-void buildRules(char **symbols, int **frequency, int symbols_number, float tolerance, Rule *rules)
+void buildRules(char **symbols, int **frequency, int symbols_number, Rule *rules)
 {
     int i, j, k;
     

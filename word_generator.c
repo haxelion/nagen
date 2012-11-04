@@ -46,7 +46,7 @@ int extractLine(FILE *file, int length, char *buffer)
     int valid = -1;
     while(valid==-1)
     {
-        if(getLine(buffer, length, file)!=NULL)
+        if(getLine(buffer, length, file)!=0)
         {
             valid = interpret(buffer);
             if(valid == -2)

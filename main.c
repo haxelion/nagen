@@ -18,6 +18,7 @@ Copyright 2012 Charles Hubain <haxelion@gmail.com>
 */
 #include "nagen.h"
 #include "word_generator.h"
+#include "rule_generator.h"
 
 Arguments* processArguments(int argc, char**argv);
 void printHelp();
