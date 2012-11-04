@@ -4,6 +4,7 @@ LDFLAGS=
 SOURCES=main.c word_generator.c rule_generator.c nagen.c
 OBJECTS=$(SOURCES:.c=.o)
 EXECUTABLE=nagen
+INSTALL_PATH?=/usr/local
 
 all: $(SOURCES) $(EXECUTABLE)
     
@@ -12,8 +13,13 @@ $(EXECUTABLE): $(OBJECTS)
 .c.o:
 	$(CC) $(CFLAGS) $< -o $@
 
-.PHONY : clean stat
+.PHONY : clean install uninstall
+
 clean:
-	rm *.o
-stat:
-	cat *.c *.h | wc
+	rm -rf *.o
+
+install: all
+	cp ./nagen $(INSTALL_PATH)/bin
+
+uninstall:
+	rm $(INSTALL_PATH)/bin/nagen
