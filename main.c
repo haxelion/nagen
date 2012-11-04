@@ -56,8 +56,6 @@ Arguments* processArguments(int argc, char**argv)
     Arguments *args = (Arguments*) malloc(sizeof(Arguments));
     args->name_length = 0;
     args->name_number = 1;
-    args->tolerance = 0;
-    args->output_file = stdout;
     int i;
     if(argc>1)
     {
@@ -67,68 +65,52 @@ Arguments* processArguments(int argc, char**argv)
             printf("Input file %s not found.\n", argv[argc-1]);
             exit(1);
         }
-        if(strcmp(argv[1], "-g") == 0)
+        args->mode = 0;
+        for(i = 1; i<argc-1; i++)
         {
-            args->mode = 1;
-            for(i = 2; i<argc-1; i++)
+            if(strcmp(argv[i], "-s") == 0)
             {
-                if(strcmp(argv[i], "-s") == 0)
+                args->symbol_file = fopen(argv[i+1], "r");
+                args->mode = 1;
+                if(args->symbol_file == NULL)
                 {
-                    args->symbol_file = fopen(argv[i+1], "r");
-                    if(args->symbol_file == NULL)
-                    {
-                        printf("Symbol file %s not found.\n", argv[i+1]);
-                        exit(1);
-                    }
-                    i++;
+                    printf("Symbol file %s not found.\n", argv[i+1]);
+                    exit(1);
                 }
-                else if(strcmp(argv[i], "-t") == 0)
-                {
-                    args->tolerance = atof(argv[i+1]);
-                    i++;
-                }
-                else if(strcmp(argv[i], "-o") == 0)
-                {
-                    args->output_file = fopen(argv[i+1], "w");
-                    if(args->output_file == NULL)
-                    {
-                        printf("Output file %s not found.\n", argv[i+1]);
-                        exit(1);
-                    }
-                    i++;
-                }
-                else
-                    printf("Unrecognized %s switch\n", argv[i]);
+                i++;
             }
-        }
-        else
-        {
-            args->mode = 0;
-            for(i = 1; i<argc-1; i++)
+            else if(strcmp(argv[i], "-o") == 0)
             {
-                if(strcmp(argv[i], "-l") == 0)
+                args->output_file = fopen(argv[i+1], "w");
+                if(args->output_file == NULL)
                 {
-                    args->name_length = atoi(argv[i+1]);
-                    i++;
+                    printf("Output file %s not found.\n", argv[i+1]);
+                    exit(1);
                 }
-                else if(strcmp(argv[i], "-n") == 0)
-                {
-                    args->name_number = atoi(argv[i+1]);
-                    i++;
-                }
-                else if(strcmp(argv[i], "-o") == 0)
-                {
-                    args->output_file = fopen(argv[i+1], "w");
-                    if(args->output_file == NULL)
-                    {
-                        printf("Output file %s not found.\n", argv[i+1]);
-                        exit(1);
-                    }
-                    i++;
-                }
-                else
-                    printf("Unrecognized %s switch\n", argv[i]);
+                i++;
             }
+            else if(strcmp(argv[i], "-l") == 0)
+            {
+                args->name_length = atoi(argv[i+1]);
+                i++;
+            }
+            else if(strcmp(argv[i], "-n") == 0)
+            {
+                args->name_number = atoi(argv[i+1]);
+                i++;
+            }
+            else if(strcmp(argv[i], "-o") == 0)
+            {
+                args->output_file = fopen(argv[i+1], "w");
+                if(args->output_file == NULL)
+                {
+                    printf("Output file %s not found.\n", argv[i+1]);
+                    exit(1);
+                }
+                i++;
+            }
+            else
+                printf("Unrecognized %s switch\n", argv[i]);
         }
     }
     else
@@ -144,7 +126,7 @@ void printHelp()
     printf("\nNagen is a custom language random name generator.\n");
     printf("Nagen is released under the GNU General Public License v3.\n");
     printf("See http://www.gnu.org/licenses/gpl.html.\n");
-    printf("Copyright 2012 Charles Hubain <haxelion@gmail.com>.\n");
+    printf("Copyright 2012 Charles Hubain <haxelion@gmail.com>.\n\n");
     printf("Usage: nagen [-n numberofname] [-l lengthofname] [-o outputfile] languagefile\n");
-    printf("       nagen -g [-s symbolfile] [-t tolerance] [-o outputfile] wordlistfile\n");
+    printf("       nagen -s symbolfile [-o outputfile] wordlistfile\n");
 }

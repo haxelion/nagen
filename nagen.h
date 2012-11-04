@@ -29,7 +29,6 @@ Copyright 2012 Charles Hubain <haxelion@gmail.com>
 typedef struct
 {
     int mode;
-    float tolerance;
     int name_length;
     int name_number;
     FILE *input_file;
