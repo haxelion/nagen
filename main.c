@@ -57,6 +57,7 @@ Arguments* processArguments(int argc, char**argv)
     Arguments *args = (Arguments*) malloc(sizeof(Arguments));
     args->name_length = 0;
     args->name_number = 1;
+    args->output_file = stdout;
     int i;
     if(argc>1)
     {
